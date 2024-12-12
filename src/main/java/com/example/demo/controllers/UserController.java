@@ -7,20 +7,34 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:5173") // Configuración CORS
 public class UserController {
 
     @Autowired
     private UserRepository userRepository;
 
+    @PostMapping("/register")
+    public ResponseEntity<String> registerUser(@RequestBody User newUser) {
+        // Verificar si el usuario ya existe
+        if (userRepository.findByUser(newUser.getUser()) != null) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("El usuario ya existe");
+        }
+
+        // Crear y guardar el nuevo usuario
+        newUser.setScore(0); // Inicializar la puntuación
+        newUser.setDate(LocalDate.now()); // Establecer la fecha de creación
+        userRepository.save(newUser);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body("Usuario creado exitosamente");
+    }
+
     @PostMapping("/login")
-    @CrossOrigin(origins = "http://localhost:5173") // Permite el origen del frontend
     public ResponseEntity<String> login(@RequestParam("user") String username, @RequestParam("password") String password) {
         User user = userRepository.findByUser(username);
 
@@ -50,6 +64,31 @@ public class UserController {
             return ResponseEntity.ok("Hello, " + username + "! Your role is: " + role);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
+    }
+
+    // Nuevo endpoint: Obtener usuarios ordenados por puntuación
+    @GetMapping("/users/scoreboard")
+    public ResponseEntity<List<User>> getUsersByScore() {
+        List<User> users = userRepository.findAll();
+        users.sort((u1, u2) -> Integer.compare(u2.getScore(), u1.getScore())); // Ordenar por puntuación descendente
+        return ResponseEntity.ok(users);
+    }
+
+    // Nuevo endpoint: Actualizar puntuación
+    @PutMapping("/users/update-score/{username}")
+    public ResponseEntity<String> updateScore(
+            @PathVariable String username,
+            @RequestParam int score) {
+        User user = userRepository.findByUser(username);
+
+        if (user != null) {
+            user.setScore(score); // Actualizar puntuación
+            user.setDate(LocalDate.now()); // Actualizar fecha
+            userRepository.save(user);
+            return ResponseEntity.ok("Puntuación actualizada correctamente");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
         }
     }
 }
