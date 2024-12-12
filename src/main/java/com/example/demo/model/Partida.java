@@ -17,10 +17,6 @@ public class Partida {
     @OneToMany(mappedBy = "partida")
     private List<Boleto> boletos;
 
-    // Numeros ganadores (podrías almacenarlos como una lista de números o como un número entero que represente una combinación)
-    // ...
-
-
     public Long getId() {
         return id;
     }

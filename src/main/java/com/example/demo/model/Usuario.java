@@ -1,6 +1,8 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
+
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -21,6 +23,13 @@ public class Usuario {
 
     @OneToMany(mappedBy = "usuario")
     private List<Boleto> boletos;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "fecha_registro")
+    private Date fechaRegistro;
+
+    @Column(name = "activo")
+    private boolean activo;
 
     public Long getId() {
         return id;

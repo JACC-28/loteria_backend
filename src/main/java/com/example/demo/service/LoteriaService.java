@@ -11,6 +11,7 @@ import java.util.List;
 import com.example.demo.model.Numero;
 import java.util.*;
 import java.util.stream.Collectors;
+import com.example.demo.model.Dificultad;
 
 @Service
 public class LoteriaService {

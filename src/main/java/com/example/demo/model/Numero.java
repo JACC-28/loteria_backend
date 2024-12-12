@@ -9,6 +9,12 @@ public class Numero {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne
+    @JoinColumn(name = "tablero_id")
+    private Tablero tablero;
+
+// Getters and Setters for tablero
+
     @Column
     private Integer valor;
 

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,7 +34,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     List<Usuario> findByEmailContaining(String parteDelEmail);
 
     @Query("SELECT u FROM Usuario u WHERE u.fechaRegistro BETWEEN :fechaInicio AND :fechaFin")
-    List<Usuario> findUsuariosPorRangoDeFechas(@Param("fechaInicio") java.util.Date fechaInicio, @Param("fechaFin") java.util.Date fechaFin);
+    List<Usuario> findUsuariosPorRangoDeFechas(@Param("fechaInicio") Date fechaInicio, @Param("fechaFin") Date fechaFin);
 
     @Query("SELECT COUNT(u) FROM Usuario u WHERE u.activo = true")
     Long countUsuariosActivos();

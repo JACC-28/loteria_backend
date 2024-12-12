@@ -2,6 +2,7 @@ package com.example.demo.model;
 
 import jakarta.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "tableros")
@@ -22,6 +23,13 @@ public class Tablero {
     @Enumerated(EnumType.STRING)
     @Column(name = "dificultad")
     private Dificultad dificultad;
+
+    @OneToMany(mappedBy = "tablero", cascade = CascadeType.ALL)
+    private List<Numero> numeros;
+
+    public List<Numero> getNumeros() {
+        return numeros;
+    }
 
     // Getters y Setters
     public Long getId() {
@@ -54,6 +62,9 @@ public class Tablero {
 
     public void setDificultad(Dificultad dificultad) {
         this.dificultad = dificultad;
+    }
+    public void setNumeros(List<Numero> numeros) {
+        this.numeros = numeros;
     }
 
 }
