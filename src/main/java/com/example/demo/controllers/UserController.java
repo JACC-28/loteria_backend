@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:5173") // Configuración CORS
@@ -75,20 +76,29 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-    // Nuevo endpoint: Actualizar puntuación
     @PutMapping("/users/update-score/{username}")
     public ResponseEntity<String> updateScore(
             @PathVariable String username,
-            @RequestParam int score) {
+            @RequestBody Map<String, Integer> requestBody) { // Cambiar para leer desde el cuerpo
+        int score = requestBody.get("score");
         User user = userRepository.findByUser(username);
 
         if (user != null) {
-            user.setScore(score); // Actualizar puntuación
-            user.setDate(LocalDate.now()); // Actualizar fecha
+            user.setScore(user.getScore() + score); // Sumar la nueva puntuación
+            user.setDate(LocalDate.now()); // Actualizar la fecha
             userRepository.save(user);
             return ResponseEntity.ok("Puntuación actualizada correctamente");
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
         }
     }
+
+
+
+    @GetMapping("/users")
+    public ResponseEntity<List<User>> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return ResponseEntity.ok(users);
+    }
+
 }

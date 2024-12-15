@@ -23,7 +23,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // Deshabilitar CSRF
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Habilitar configuración CORS
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/register", "/cards/upload", "/cards/**", "/imagenes/**","/boards/**", "/users/scoreboard").permitAll()
+                        .requestMatchers("/login", "/register", "/cards/upload", "/cards/**", "/imagenes/**","/boards/**", "/users/scoreboard","/users","/users/update-score/**").permitAll()
                         .anyRequest().authenticated() // Proteger los demás endpoints
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
