@@ -1,5 +1,4 @@
 package com.example.demo.models;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import java.time.LocalDate;
@@ -17,14 +16,17 @@ public class User {
 
     private LocalDate date; // Campo para la fecha de la última actualización de la puntuación
 
+    private int ganadas; // Nuevo campo para partidas ganadas
+
     public User() {}
 
-    public User(String user, String password, String role, int score, LocalDate date) {
+    public User(String user, String password, String role, int score, LocalDate date, int ganadas) {
         this.user = user;
         this.password = password;
         this.role = role;
         this.score = score;
         this.date = date;
+        this.ganadas = ganadas;
     }
 
     public String getUser() {
@@ -65,5 +67,13 @@ public class User {
 
     public void setDate(LocalDate date) {
         this.date = date;
+    }
+
+    public int getGanadas() {
+        return ganadas;
+    }
+
+    public void setGanadas(int ganadas) {
+        this.ganadas = ganadas;
     }
 }

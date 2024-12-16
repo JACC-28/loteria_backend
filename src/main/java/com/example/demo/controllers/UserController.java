@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:5173") // Configuración CORS
@@ -28,6 +29,7 @@ public class UserController {
 
         // Crear y guardar el nuevo usuario
         newUser.setScore(0); // Inicializar la puntuación
+        newUser.setGanadas(0); // Inicializar las ganadas
         newUser.setDate(LocalDate.now()); // Establecer la fecha de creación
         userRepository.save(newUser);
 
@@ -67,7 +69,7 @@ public class UserController {
         }
     }
 
-    // Nuevo endpoint: Obtener usuarios ordenados por puntuación
+    // Obtener usuarios ordenados por puntuación
     @GetMapping("/users/scoreboard")
     public ResponseEntity<List<User>> getUsersByScore() {
         List<User> users = userRepository.findAll();
@@ -75,20 +77,91 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-    // Nuevo endpoint: Actualizar puntuación
+    // Actualizar el score del usuario sumando un valor
     @PutMapping("/users/update-score/{username}")
     public ResponseEntity<String> updateScore(
             @PathVariable String username,
-            @RequestParam int score) {
+            @RequestBody Map<String, Integer> requestBody) {
+
+        Integer scoreToAdd = requestBody.get("score");
+        if (scoreToAdd == null) {
+            return ResponseEntity.badRequest().body("No se envió la puntuación a sumar");
+        }
+
         User user = userRepository.findByUser(username);
 
         if (user != null) {
-            user.setScore(score); // Actualizar puntuación
-            user.setDate(LocalDate.now()); // Actualizar fecha
+            user.setScore(user.getScore() + scoreToAdd); // Sumar la nueva puntuación
+            user.setDate(LocalDate.now()); // Actualizar la fecha
             userRepository.save(user);
             return ResponseEntity.ok("Puntuación actualizada correctamente");
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
         }
     }
+
+    // Actualizar las ganadas del usuario sumando 1
+    @PutMapping("/users/update-ganadas/{username}")
+    public ResponseEntity<String> updateGanadas(@PathVariable String username) {
+        User user = userRepository.findByUser(username);
+
+        if (user != null) {
+            user.setGanadas(user.getGanadas() + 1);
+            userRepository.save(user);
+            return ResponseEntity.ok("Ganadas incrementadas correctamente");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
+        }
+    }
+
+    // Obtener todos los usuarios
+    @GetMapping("/users")
+    public ResponseEntity<List<User>> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return ResponseEntity.ok(users);
+    }
+
+    // Obtener un usuario por su username
+    @GetMapping("/users/{username}")
+    public ResponseEntity<?> getUserByUsername(@PathVariable String username) {
+        User user = userRepository.findByUser(username);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
+        }
+        return ResponseEntity.ok(user);
+    }
+
+    // Actualizar información del usuario (ej. password, role)
+    @PutMapping("/users/{username}")
+    public ResponseEntity<?> updateUser(@PathVariable String username, @RequestBody User updatedUser) {
+        User user = userRepository.findByUser(username);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
+        }
+
+        // Actualizar campos necesarios:
+        // Aquí solo como ejemplo, password y role (score y ganadas se actualizan con los endpoints dedicados)
+        if (updatedUser.getPassword() != null) {
+            user.setPassword(updatedUser.getPassword());
+        }
+        if (updatedUser.getRole() != null) {
+            user.setRole(updatedUser.getRole());
+        }
+
+        userRepository.save(user);
+        return ResponseEntity.ok("Usuario actualizado correctamente");
+    }
+
+    // Eliminar un usuario
+    @DeleteMapping("/users/{username}")
+    public ResponseEntity<String> deleteUser(@PathVariable String username) {
+        User user = userRepository.findByUser(username);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
+        }
+
+        userRepository.delete(user);
+        return ResponseEntity.ok("Usuario eliminado correctamente");
+    }
+
 }

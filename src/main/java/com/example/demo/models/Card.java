@@ -44,4 +44,8 @@ public class Card {
     public void setImage(String image) {
         this.image = image;
     }
+    @Override
+    public String toString() {
+        return "Card{id='" + id + "', number='" + number + "', image='" + image + "'}";
+    }
 }
