@@ -10,14 +10,13 @@ public class User {
 
     private String password;
 
-    private String role; // Campo para el rol del usuario
+    private String role;
 
-    private int score; // Campo para la puntuación
+    private int score;
 
-    private LocalDate date; // Campo para la fecha de la última actualización de la puntuación
+    private LocalDate date;
 
-    private int ganadas; // Nuevo campo para partidas ganadas
-
+    private int ganadas;
     public User() {}
 
     public User(String user, String password, String role, int score, LocalDate date, int ganadas) {

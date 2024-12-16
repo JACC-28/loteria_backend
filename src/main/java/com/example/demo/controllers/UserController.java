@@ -4,6 +4,7 @@ import com.example.demo.models.User;
 import com.example.demo.repositories.UserRepository;
 import com.example.demo.security.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,6 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody User newUser) {
-        // Verificar si el usuario ya existe
         if (userRepository.findByUser(newUser.getUser()) != null) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("El usuario ya existe");
         }
@@ -41,11 +41,9 @@ public class UserController {
         User user = userRepository.findByUser(username);
 
         if (user != null && user.getPassword().equals(password)) {
-            // Incluir el rol al generar el token
             String token = JwtUtil.generateToken(user.getUser(), user.getRole());
             return ResponseEntity.ok(token);
         } else {
-            // Retornar un estado 401 para credenciales incorrectas
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales incorrectas");
         }
     }
@@ -79,6 +77,7 @@ public class UserController {
 
     // Actualizar el score del usuario sumando un valor
     @PutMapping("/users/update-score/{username}")
+    @Transactional
     public ResponseEntity<String> updateScore(
             @PathVariable String username,
             @RequestBody Map<String, Integer> requestBody) {
@@ -93,7 +92,7 @@ public class UserController {
         if (user != null) {
             user.setScore(user.getScore() + scoreToAdd); // Sumar la nueva puntuación
             user.setDate(LocalDate.now()); // Actualizar la fecha
-            userRepository.save(user);
+            // No es necesario llamar a save() explícitamente si la entidad es manejada por la transacción
             return ResponseEntity.ok("Puntuación actualizada correctamente");
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
@@ -102,12 +101,13 @@ public class UserController {
 
     // Actualizar las ganadas del usuario sumando 1
     @PutMapping("/users/update-ganadas/{username}")
+    @Transactional
     public ResponseEntity<String> updateGanadas(@PathVariable String username) {
         User user = userRepository.findByUser(username);
 
         if (user != null) {
             user.setGanadas(user.getGanadas() + 1);
-            userRepository.save(user);
+            // No es necesario llamar a save() explícitamente si la entidad es manejada por la transacción
             return ResponseEntity.ok("Ganadas incrementadas correctamente");
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
@@ -121,18 +121,18 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-    // Obtener un usuario por su username
     @GetMapping("/users/{username}")
-    public ResponseEntity<?> getUserByUsername(@PathVariable String username) {
+    public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
         User user = userRepository.findByUser(username);
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
+            return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(user);
     }
 
     // Actualizar información del usuario (ej. password, role)
     @PutMapping("/users/{username}")
+    @Transactional
     public ResponseEntity<?> updateUser(@PathVariable String username, @RequestBody User updatedUser) {
         User user = userRepository.findByUser(username);
         if (user == null) {
@@ -140,7 +140,6 @@ public class UserController {
         }
 
         // Actualizar campos necesarios:
-        // Aquí solo como ejemplo, password y role (score y ganadas se actualizan con los endpoints dedicados)
         if (updatedUser.getPassword() != null) {
             user.setPassword(updatedUser.getPassword());
         }
@@ -148,12 +147,12 @@ public class UserController {
             user.setRole(updatedUser.getRole());
         }
 
-        userRepository.save(user);
         return ResponseEntity.ok("Usuario actualizado correctamente");
     }
 
     // Eliminar un usuario
     @DeleteMapping("/users/{username}")
+    @Transactional
     public ResponseEntity<String> deleteUser(@PathVariable String username) {
         User user = userRepository.findByUser(username);
         if (user == null) {
